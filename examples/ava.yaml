@@ -1,0 +1,10 @@
+adapters:
+  slack:
+    key: xoxb-xxx
+    channels:
+      - general
+
+plugins:
+  - image: agonzalezro/ava-test
+    environment:
+      KEY: this-is-a-secret

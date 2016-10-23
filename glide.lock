@@ -1,0 +1,51 @@
+hash: b2850e67f92e5ffe38c839fe383b7cf110d0c5d3950774ec9fd095e94df79cf0
+updated: 2016-10-22T15:40:51.937623678+02:00
+imports:
+- name: github.com/docker/docker
+  version: ce6cfef36d6fa52df6ebdd3dd996d6bebe0f308d
+  subpackages:
+  - api/types/swarm
+  - opts
+  - pkg/archive
+  - pkg/fileutils
+  - pkg/homedir
+  - pkg/stdcopy
+  - api/types/mount
+  - api/types/filters
+  - pkg/idtools
+  - pkg/ioutils
+  - pkg/pools
+  - pkg/promise
+  - pkg/system
+  - pkg/longpath
+  - api/types/versions
+- name: github.com/docker/go-units
+  version: 8a7beacffa3009a9ac66bad506b18ffdd110cf97
+- name: github.com/fsouza/go-dockerclient
+  version: 425c52204cf4791085dabf1883aa0953660def9c
+- name: github.com/hashicorp/go-cleanhttp
+  version: ad28ea4487f05916463e2423a55166280e8254b5
+- name: github.com/Microsoft/go-winio
+  version: ce2922f643c8fd76b46cadc7f404a06282678b34
+- name: github.com/opencontainers/runc
+  version: 850b9c0b50dc2f3b9fa3e58d442bbae22f89a3ef
+  subpackages:
+  - libcontainer/system
+  - libcontainer/user
+- name: github.com/Sirupsen/logrus
+  version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+- name: golang.org/x/net
+  version: 41c5c5cb12965112d2e298342c73e6b3e045a14a
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: golang.org/x/sys
+  version: 002cbb5f952456d0c50e0d2aff17ea5eca716979
+  subpackages:
+  - windows
+  - unix
+- name: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+devImports: []

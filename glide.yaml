@@ -1,0 +1,8 @@
+package: github.com/agonzalezro/ava
+import:
+- package: github.com/stretchr/testify
+  version: ^1.1.4
+- package: gopkg.in/yaml.v2
+- package: github.com/fsouza/go-dockerclient
+- package: github.com/Sirupsen/logrus
+  version: ^0.10.0
