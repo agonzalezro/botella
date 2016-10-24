@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"sync/atomic"
 
 	"golang.org/x/net/websocket"
@@ -19,7 +20,7 @@ const (
 type SlackAdaptor struct {
 	ws *websocket.Conn
 
-	BotID   string
+	botID   string
 	counter uint64
 }
 
@@ -28,6 +29,17 @@ type SlackMessage struct {
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
+}
+
+func (sm SlackMessage) isChannel() bool {
+	// IDs in Slack seem to start with C for a Channel or with
+	// G for a Group (private channel or group of people)
+	return strings.HasPrefix(sm.Channel, "C") || strings.HasPrefix(sm.Channel, "G")
+}
+
+func (sm SlackMessage) isDirectMessage() bool {
+	// IDs in Slack start with D for direct messages
+	return strings.HasPrefix(sm.Channel, "D")
 }
 
 func NewSlack(key string) (*SlackAdaptor, error) {
@@ -68,7 +80,11 @@ func NewSlack(key string) (*SlackAdaptor, error) {
 		return nil, err
 	}
 
-	return &SlackAdaptor{ws: ws, BotID: p.Self.ID}, nil
+	return &SlackAdaptor{ws: ws, botID: p.Self.ID}, nil
+}
+
+func (a *SlackAdaptor) GetID() string {
+	return a.botID
 }
 
 func (a *SlackAdaptor) getSlackMessage() (*SlackMessage, error) {
@@ -88,7 +104,12 @@ func (a *SlackAdaptor) Attach() (chan Message, chan error) {
 				continue
 			}
 			if m.Type == "message" {
-				messagesCh <- Message{Channel: m.Channel, Body: m.Text}
+				messagesCh <- Message{
+					Channel:         m.Channel,
+					Body:            m.Text,
+					IsChannel:       m.isChannel(),
+					IsDirectMessage: m.isDirectMessage(),
+				}
 			}
 		}
 	}()

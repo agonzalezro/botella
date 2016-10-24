@@ -21,6 +21,9 @@ plugins:
   - image: agonzalezro/ava-test
     environment:
       KEY: this-is-a-secret
+    only_mentions: true
+    only_direct_messages: true
+    only_channels: true
 `
 
 func setup(assert *assert.Assertions) *os.File {
@@ -51,4 +54,8 @@ func TestNewFromFile(t *testing.T) {
 	assert.Equal("agonzalezro/ava-test", plugin.Image)
 	assert.Equal(len(plugin.Environment), 1)
 	assert.Equal("this-is-a-secret", plugin.Environment["KEY"])
+
+	assert.Equal(true, plugin.OnlyDirectMessages)
+	assert.Equal(true, plugin.OnlyMentions)
+	assert.Equal(true, plugin.OnlyChannels)
 }

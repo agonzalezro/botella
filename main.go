@@ -29,6 +29,21 @@ func inferConfigPath() (string, error) {
 	return "", fmt.Errorf("No %s file found!", strings.Join(paths, " or "))
 }
 
+func ShouldBeRun(a bot.Adaptor, p *plugin.Plugin, m *bot.Message) bool {
+	fmt.Printf("%+v", p)
+	fmt.Printf("%+v", m)
+	if p.RunOnlyOnChannels {
+		return m.IsChannel
+	}
+	if p.RunOnlyOnDirectMessages {
+		return m.IsDirectMessage
+	}
+	if p.RunOnlyOnMentions {
+		return strings.Contains(m.Body, a.GetID())
+	}
+	return true
+}
+
 func main() {
 	configPath, err := inferConfigPath()
 	if err != nil {
@@ -48,6 +63,11 @@ func main() {
 			pluginConfig.Image,
 			pluginConfig.Environment,
 		)
+		// TODO: this is a little bit ugly
+		plugin.RunOnlyOnChannels = pluginConfig.OnlyChannels
+		plugin.RunOnlyOnDirectMessages = pluginConfig.OnlyDirectMessages
+		plugin.RunOnlyOnMentions = pluginConfig.OnlyMentions
+
 		if err != nil {
 			log.Warningf("Error loading plugin (image: %s): %v", pluginConfig.Image, err)
 			continue
@@ -70,6 +90,9 @@ func main() {
 		case m := <-messagesCh:
 			log.Debugf("Slack message received: %v", m)
 			for _, p := range plugins {
+				if !ShouldBeRun(slack, p, &m) {
+					continue
+				}
 				pluginResponse, err := p.Run(m.Body)
 				if err != nil {
 					errorsCh <- err

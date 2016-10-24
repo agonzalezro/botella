@@ -15,6 +15,10 @@ type Plugin struct {
 	container *docker.Container
 
 	environment map[string]string
+
+	RunOnlyOnChannels       bool
+	RunOnlyOnDirectMessages bool
+	RunOnlyOnMentions       bool
 }
 
 func environmentAsArrayOfString(environment map[string]string) []string {

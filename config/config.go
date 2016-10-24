@@ -17,8 +17,11 @@ type Config struct {
 }
 
 type Plugin struct {
-	Image       string
-	Environment map[string]string
+	Image              string
+	Environment        map[string]string
+	OnlyChannels       bool `yaml:"only_channels"`
+	OnlyDirectMessages bool `yaml:"only_direct_messages"`
+	OnlyMentions       bool `yaml:"only_mentions"`
 }
 
 func NewFromFile(filePath string) (*Config, error) {
