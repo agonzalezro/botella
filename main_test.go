@@ -9,16 +9,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type testAdaptor struct{}
+type testAdapter struct{}
 
-func (testAdaptor) GetID() string                          { return "test-id" }
-func (testAdaptor) Attach() (chan bot.Message, chan error) { return nil, nil }
-func (testAdaptor) Send(bot.Message) error                 { return nil }
+func (testAdapter) GetID() string                          { return "test-id" }
+func (testAdapter) Attach() (chan bot.Message, chan error) { return nil, nil }
+func (testAdapter) Send(bot.Message) error                 { return nil }
 
 func TestIfPluginShouldBeRun(t *testing.T) {
 	assert := assert.New(t)
 
-	adaptor := testAdaptor{}
+	adapter := testAdapter{}
 
 	type c struct {
 		runOnlyOnChannels, runOnlyOnDirectMessages, runOnlyOnMentions bool
@@ -49,8 +49,8 @@ func TestIfPluginShouldBeRun(t *testing.T) {
 
 		assert.Equal(
 			expected,
-			ShouldBeRun(&adaptor, p, m),
-			fmt.Sprintf("%+v %+v %+v", adaptor, p, m))
+			ShouldBeRun(&adapter, p, m),
+			fmt.Sprintf("%+v %+v %+v", adapter, p, m))
 	}
 
 	// if run only on DMs but it's a channel

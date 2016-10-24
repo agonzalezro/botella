@@ -17,7 +17,7 @@ const (
 	wsURL           = "https://api.slack.com/"
 )
 
-type SlackAdaptor struct {
+type SlackAdapter struct {
 	ws *websocket.Conn
 
 	botID   string
@@ -42,7 +42,7 @@ func (sm SlackMessage) isDirectMessage() bool {
 	return strings.HasPrefix(sm.Channel, "D")
 }
 
-func NewSlack(key string) (*SlackAdaptor, error) {
+func NewSlack(key string) (*SlackAdapter, error) {
 	url := fmt.Sprintf(rtmURLformatter, key)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -80,20 +80,20 @@ func NewSlack(key string) (*SlackAdaptor, error) {
 		return nil, err
 	}
 
-	return &SlackAdaptor{ws: ws, botID: p.Self.ID}, nil
+	return &SlackAdapter{ws: ws, botID: p.Self.ID}, nil
 }
 
-func (a *SlackAdaptor) GetID() string {
+func (a *SlackAdapter) GetID() string {
 	return a.botID
 }
 
-func (a *SlackAdaptor) getSlackMessage() (*SlackMessage, error) {
+func (a *SlackAdapter) getSlackMessage() (*SlackMessage, error) {
 	m := SlackMessage{}
 	err := websocket.JSON.Receive(a.ws, &m)
 	return &m, err
 }
 
-func (a *SlackAdaptor) Attach() (chan Message, chan error) {
+func (a *SlackAdapter) Attach() (chan Message, chan error) {
 	messagesCh := make(chan Message, 1)
 	errorsCh := make(chan error)
 	go func() {
@@ -116,7 +116,7 @@ func (a *SlackAdaptor) Attach() (chan Message, chan error) {
 	return messagesCh, errorsCh
 }
 
-func (a *SlackAdaptor) Send(m Message) error {
+func (a *SlackAdapter) Send(m Message) error {
 	sm := SlackMessage{
 		ID:      atomic.AddUint64(&a.counter, 1),
 		Type:    "message",

@@ -29,7 +29,7 @@ func inferConfigPath() (string, error) {
 	return "", fmt.Errorf("No %s file found!", strings.Join(paths, " or "))
 }
 
-func ShouldBeRun(a bot.Adaptor, p *plugin.Plugin, m *bot.Message) bool {
+func ShouldBeRun(a bot.Adapter, p *plugin.Plugin, m *bot.Message) bool {
 	fmt.Printf("%+v", p)
 	fmt.Printf("%+v", m)
 	if p.RunOnlyOnChannels {
@@ -76,13 +76,13 @@ func main() {
 		plugins = append(plugins, plugin)
 	}
 
-	// TODO: in the future there should be more adaptors
+	// TODO: in the future there should be more adapters
 	slack, err := bot.New("slack", config.Adapters.Slack.Key)
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(-1)
 	}
-	log.Info("Slack adaptor ready. Waiting for messages...")
+	log.Info("Slack adapter ready. Waiting for messages...")
 
 	messagesCh, errorsCh := slack.Attach()
 	for {

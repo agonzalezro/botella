@@ -9,18 +9,18 @@ type Message struct {
 	IsDirectMessage bool
 }
 
-type Adaptor interface {
+type Adapter interface {
 	GetID() string
 
 	Attach() (chan Message, chan error)
 	Send(Message) error
 }
 
-func New(adaptor, key string) (Adaptor, error) {
-	switch adaptor {
+func New(adapter, key string) (Adapter, error) {
+	switch adapter {
 	case "slack":
 		return NewSlack(key)
 	default:
-		return nil, fmt.Errorf("Adaptor '%s' not found", adaptor)
+		return nil, fmt.Errorf("Adapter '%s' not found", adapter)
 	}
 }
