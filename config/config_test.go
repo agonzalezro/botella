@@ -14,8 +14,8 @@ adapters:
     key: xxx
     channels:
       - general
-    name: Ava González
-    pic: url
+  http:
+    port: 8080
 
 plugins:
   - image: agonzalezro/ava-test
@@ -48,6 +48,8 @@ func TestNewFromFile(t *testing.T) {
 	slack := config.Adapters.Slack
 	assert.Equal("xxx", slack.Key)
 	assert.Equal([]string{"general"}, slack.Channels)
+
+	assert.Equal(8080, config.Adapters.HTTP.Port)
 
 	assert.Equal(len(config.Plugins), 1)
 	plugin := config.Plugins[0]

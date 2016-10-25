@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
 
@@ -76,7 +78,32 @@ func main() {
 		plugins = append(plugins, plugin)
 	}
 
-	// TODO: in the future there should be more adapters
+	// TODO: this could be probably abstracted to be used as another adaptor (see Slack below)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+		log.Debugf("HTTP POST received: %s", body)
+
+		for _, p := range plugins {
+			pluginResponse, err := p.Run(string(body))
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			w.Write([]byte(pluginResponse + "\n"))
+		}
+	})
+
+	host := fmt.Sprintf(":%d", config.Adapters.HTTP.Port)
+	go func() { log.Fatal(http.ListenAndServe(host, nil)) }()
+
+	log.Infof("HTTP adapter ready. Waiting for your POSTs at %s...", host)
+	// --- END OF TODO ---
+
+	// TODO: we shouldn't count that Slack is always configured
 	slack, err := bot.New("slack", config.Adapters.Slack.Key)
 	if err != nil {
 		fmt.Print(err)

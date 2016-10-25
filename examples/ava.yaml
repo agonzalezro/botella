@@ -3,6 +3,8 @@ adapters:
     key: xoxb-xxx
     channels:
       - general
+  http:
+    port: 8080
 
 plugins:
   - image: agonzalezro/ava-test

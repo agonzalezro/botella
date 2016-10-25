@@ -12,6 +12,9 @@ type Config struct {
 			Key      string
 			Channels []string
 		}
+		HTTP struct {
+			Port int
+		}
 	}
 	Plugins []Plugin
 }

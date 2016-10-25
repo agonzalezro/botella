@@ -21,6 +21,8 @@ adapters:
     key: xoxb-xxx
     channels:
       - general
+  http:
+    port: 8080
 
 plugins:
   - image: agonzalezro/ava-test
@@ -31,8 +33,13 @@ plugins:
 
 I think that it's pretty explainable, but basically: 
 
-- `adapters` explain the configuration of the bot adapter, at the moment of writing you can just use Slack, in the future some other adapters as IRC should be supported.
+- `adapters` explain the configuration of the bot adapters. At the moment HTTP and Slack are supported.
 - `plugins` is a list with the plugins that you want to run. In their `environment` section you can set variable that are going to be passed to the Docker containers.
+
+Going back to the `adapters` their usage is pretty simple:
+
+- In the case of Slack you will have a bot configured with the pic and name that you specified while creating the key. You can invite that bot to whatever channel you want and also talk to him privately or in groups (careful if you add some security as explained below because a group is considered a channel).
+- In the case of HTTP it's even simpler, you can POST (or GET, or whatever verb you want to use) to the bot in `/` in the port you specified in the conf. The bot is going to run all the plugins and return a string with all the responses.
 
 In addition, for each plugin you will be able to set the following configs:
 
@@ -70,6 +77,16 @@ $ go test
 Tips
 ----
 
+### Generating a Slack key
+
 You will need an Slack Key to use the Slack adapter (the only one available for now).
 
 Go to https://your-org-here.slack.com/services/new/bot and create a new bot, after configuring it you will see an API Token, you will need that one.
+
+### Posting to the bot
+
+You can use [httpie](https://httpie.org/) to make it easier:
+
+```bash
+$ echo "hi Ava!"|http -f GET localhost:8080 Content-Type:text/plain
+```
