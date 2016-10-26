@@ -21,6 +21,6 @@ func New(adapter, key string) (Adapter, error) {
 	case "slack":
 		return NewSlack(key)
 	default:
-		return nil, fmt.Errorf("Adapter '%s' not found", adapter)
+		return nil, fmt.Errorf("Adapter '%s' not found\n", adapter)
 	}
 }

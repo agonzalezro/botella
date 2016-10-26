@@ -49,7 +49,7 @@ func NewSlack(key string) (*SlackAdapter, error) {
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Received %d while connecting to Slack (expected 200)", resp.StatusCode)
+		return nil, fmt.Errorf("Received %d while connecting to Slack (expected 200)\n", resp.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)

@@ -28,7 +28,7 @@ func inferConfigPath() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("No %s file found!", strings.Join(paths, " or "))
+	return "", fmt.Errorf("No %s file found!\n", strings.Join(paths, " or "))
 }
 
 func ShouldBeRun(a bot.Adapter, p *plugin.Plugin, m *bot.Message) bool {
