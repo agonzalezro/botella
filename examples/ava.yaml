@@ -1,12 +1,13 @@
 adapters:
-  slack:
-    key: xoxb-xxx
-    channels:
-      - general
-  http:
-    port: 8080
+  - name: slack
+    environment:
+      key: xoxb-xxx
+  - name: http
+    environment:
+      port: 8080
 
 plugins:
   - image: agonzalezro/ava-test
     environment:
       KEY: this-is-a-secret
+    only_mentions: true

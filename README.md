@@ -3,26 +3,23 @@ Ava
 
 _Ava is a temporal name since it already clashes with an important JS test runner. New names are welcomed!_
 
+**Please, be aware that this is a beta project, don't try to run it for important stuff unless you know what you are doing!**
+
 Slack bot with plugins. What's the selling point then? The plugins are Docker containers and the bot interacts with them via stdin/stdout. In plain English that means that you can develop your plugins in whatever language you want and you will just need to pack them as Docker container to be able to use them with Ava.
-
-In the [examples/](examples/) folder you can find a simple plugin that does two important things:
-
-- it will echo whatever message is send to it, thinking out of the box you could do whatever you want with that input (from the container stdin) and output whatever you want instead just an echo.
-- it uses environment variables that are set in the configuration file, this will allow you to secretly pass secrets (my apologies for being redundant), for example some AWS access keys or similar.
 
 Usage
 -----
 
-You just need to be sure that you have a `ava.yaml` file in the path where you run it. This project could look like:
+You just need to be sure that you have a `ava.yaml` file in the path where you run it. This file could look like:
 
 ```yaml
 adapters:
-  slack:
-    key: xoxb-xxx
-    channels:
-      - general
-  http:
-    port: 8080
+  - name: slack
+    environment:
+      key: xoxb-xxx
+  - name: http
+    environment:
+      port: 8080
 
 plugins:
   - image: agonzalezro/ava-test
@@ -31,21 +28,79 @@ plugins:
     only_mentions: true
 ```
 
-I think that it's pretty explainable, but basically: 
+You can easily see that we are defining a list of adapter (how to connect with the bot) and plugins that are going to be run when the bot receives a message.
 
-- `adapters` explain the configuration of the bot adapters. At the moment HTTP and Slack are supported.
-- `plugins` is a list with the plugins that you want to run. In their `environment` section you can set variable that are going to be passed to the Docker containers.
+Adapters
+~~~~~~~~
 
-Going back to the `adapters` their usage is pretty simple:
+At the moment of writing we support two types of adapters:
 
-- In the case of Slack you will have a bot configured with the pic and name that you specified while creating the key. You can invite that bot to whatever channel you want and also talk to him privately or in groups (careful if you add some security as explained below because a group is considered a channel).
-- In the case of HTTP it's even simpler, you can POST (or GET, or whatever verb you want to use) to the bot in `/` in the port you specified in the conf. The bot is going to run all the plugins and return a string with all the responses.
+#### Slack
 
-In addition, for each plugin you will be able to set the following configs:
+To use the slack adapter you just need to define a key in this form:
 
-- `only_mentions`: will make the bot just react when its mentioned.
-- `only_channels`: will make the bot just react when the message was send in a channel.
-- `only_direct_messages`: you know how this goes...
+```yaml
+adapters:
+  - name: slack
+    environment:
+      key: xoxb-xxx
+  ...
+```
+
+To get that key you could just go to https://your-org-here.slack.com/services/new/bot and create a new bot, after configuring it you will see an API Token, copy/paste it in your `ava.yaml`.
+
+Probably, while you were creating the bot in Slack you saw that you could define its profile pic and name, be original!
+
+#### HTTP
+
+The HTTP adapter is more easy to setup, you just need to define a port where you want it to be listening:
+
+```yaml
+adapters:
+  - name: http
+    environment:
+      port: 8080
+  ...
+```
+
+Now you can start POSTing, GETting or whatever to your bot in the `/` path of wherever you are running it.
+
+For example, if we are running it in localhost in the port 8080 a good way to test it would be using [httpie](https://httpie.org/):
+
+```bash
+$ echo "hi Ava!"|http -f GET localhost:8080 Content-Type:text/plain
+```
+
+Plugins
+~~~~~~~
+
+The plugins is just a list of docker images. Check the previous example:
+
+```yaml
+...
+plugins:
+  - image: agonzalezro/ava-test
+    environment:
+      KEY: this-is-a-secret
+    only_mentions: true
+```
+
+It has 3 basic sections:
+
+- **`image`**: it's just the name of the Docker image to be run.
+- **`environment`**: the environment variables that you want to set to the container when you run it. Be careful, they are caseSensitive.
+- **`only_mentions`** et al. They are basically three permissions that you can set to the plugin and that will work in the adapters that have the concept of channels and direct messages:
+    - `only_mentions`: will make the bot just react when its mentioned.
+    - `only_channels`: will make the bot just react when the message was send in a channel.
+    - `only_direct_messages`: you know how this goes...
+
+Available plugins
+-----------------
+
+| Image | Description |
+| ----- | ----------- |
+| [agonzalezro/ava-test](https://hub.docker.com/r/agonzalezro/ava-test/) | It's a test plugin that echoes whatever you write to it and shows the value of an environment variable called `ENV`. |
+
 
 Developing plugins
 ------------------
@@ -56,37 +111,31 @@ What are the characteristics that my program needs to follow? It will need to re
 
 In the [examples/](examples/) folder you will find an example plugin called `ava-test`. This plugin is uploaded to my Docker Hub so you can use it without building it, but it's a good place to learn.
 
+Examples
+~~~~~~~~
+
+In the [examples/](examples/) folder you can find a simple plugin that does two important things:
+
+- it will echo whatever message is send to it, thinking out of the box you could do whatever you want with that input (from the container stdin) and output whatever you want instead just an echo.
+- it shows the value of an environment variable set on the `ava.yaml` file. What we are trying to show with this? That you can pass secrets around (from the `ava.yaml` to the container) without compromise them. Imagine that the container needs an AWS key, just add it to your `ava.yaml` and read the value from inside the container.
+
+
 Developing Ava
 --------------
 
-# Compiling
+Compiling
+~~~~~~~~~
 
-You will need `Go` and `glide`:
+You will need [Go](https://golang.org/) and [glide](https://github.com/Masterminds/glide):
 
 ```bash
 $ glide install
 $ go build
 ```
 
-# Testing
+Testing
+~~~~~~~
 
 ```bash
 $ go test
-```
-
-Tips
-----
-
-### Generating a Slack key
-
-You will need an Slack Key to use the Slack adapter (the only one available for now).
-
-Go to https://your-org-here.slack.com/services/new/bot and create a new bot, after configuring it you will see an API Token, you will need that one.
-
-### Posting to the bot
-
-You can use [httpie](https://httpie.org/) to make it easier:
-
-```bash
-$ echo "hi Ava!"|http -f GET localhost:8080 Content-Type:text/plain
 ```

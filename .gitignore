@@ -2,3 +2,4 @@ ava
 .#*
 vendor/
 /ava.yaml
+.DS_Store
