@@ -32,8 +32,6 @@ func inferConfigPath() (string, error) {
 }
 
 func ShouldBeRun(a bot.Adapter, p *plugin.Plugin, m *bot.Message) bool {
-	fmt.Printf("%+v", p)
-	fmt.Printf("%+v", m)
 	if p.RunOnlyOnChannels {
 		return m.IsChannel
 	}
@@ -97,14 +95,24 @@ func main() {
 		}
 	})
 
-	host := fmt.Sprintf(":%d", config.Adapters.HTTP.Port)
+	e, err := config.EnvironmentFor("http")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
+	host := fmt.Sprintf(":%s", e["PORT"])
 	go func() { log.Fatal(http.ListenAndServe(host, nil)) }()
 
 	log.Infof("HTTP adapter ready. Waiting for your POSTs at %s...", host)
 	// --- END OF TODO ---
 
 	// TODO: we shouldn't count that Slack is always configured
-	slack, err := bot.New("slack", config.Adapters.Slack.Key)
+	e, err = config.EnvironmentFor("slack")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
+	slack, err := bot.New("slack", e["KEY"])
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(-1)

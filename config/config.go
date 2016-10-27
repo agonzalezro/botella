@@ -1,22 +1,20 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Adapters struct {
-		Slack struct {
-			Key      string
-			Channels []string
-		}
-		HTTP struct {
-			Port int
-		}
-	}
-	Plugins []Plugin
+	Adapters []Adapter
+	Plugins  []Plugin
+}
+
+type Adapter struct {
+	Name        string
+	Environment map[string]string
 }
 
 type Plugin struct {
@@ -39,4 +37,13 @@ func NewFromFile(filePath string) (*Config, error) {
 
 	}
 	return c, err
+}
+
+func (c Config) EnvironmentFor(adapterName string) (map[string]string, error) {
+	for _, adapterConfig := range c.Adapters {
+		if adapterConfig.Name == adapterName {
+			return adapterConfig.Environment, nil
+		}
+	}
+	return nil, fmt.Errorf("Configuration for adapter %s not found", adapterName)
 }

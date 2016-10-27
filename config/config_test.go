@@ -10,12 +10,12 @@ import (
 
 const validYAML = ` 
 adapters:
-  slack:
-    key: xxx
-    channels:
-      - general
-  http:
-    port: 8080
+  - name: slack
+    environment:
+      KEY: xxx
+  - name: http
+    environment:
+      PORT: 8080
 
 plugins:
   - image: agonzalezro/ava-test
@@ -45,11 +45,13 @@ func TestNewFromFile(t *testing.T) {
 	config, err := NewFromFile(tmpfile.Name())
 	assert.NoError(err)
 
-	slack := config.Adapters.Slack
-	assert.Equal("xxx", slack.Key)
-	assert.Equal([]string{"general"}, slack.Channels)
+	slack := config.Adapters[0]
+	assert.Equal("slack", slack.Name)
+	assert.Equal("xxx", slack.Environment["KEY"])
 
-	assert.Equal(8080, config.Adapters.HTTP.Port)
+	http := config.Adapters[1]
+	assert.Equal("http", http.Name)
+	assert.Equal("8080", http.Environment["PORT"])
 
 	assert.Equal(len(config.Plugins), 1)
 	plugin := config.Plugins[0]
