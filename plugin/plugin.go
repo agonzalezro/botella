@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -49,6 +50,7 @@ func New(image string, environment map[string]string) (*Plugin, error) {
 		return nil, err
 	}
 
+	log.Debugf("Plugin/Container (%s) created: %+v", image, container)
 	return &Plugin{
 		Image:       image,
 		client:      client,

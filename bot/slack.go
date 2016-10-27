@@ -93,18 +93,20 @@ func (a *SlackAdapter) getSlackMessage() (*SlackMessage, error) {
 	return &m, err
 }
 
-func (a *SlackAdapter) Attach() (chan Message, chan error) {
-	messagesCh := make(chan Message, 1)
-	errorsCh := make(chan error)
+func (a *SlackAdapter) RunAndAttach() (chan Message, chan Message, chan error) {
+	stdinCh := make(chan Message, 1)
+	stdoutCh := make(chan Message, 1)
+	stderrCh := make(chan error, 1)
+
 	go func() {
 		for {
 			m, err := a.getSlackMessage()
 			if err != nil {
-				errorsCh <- err
+				stderrCh <- err
 				continue
 			}
 			if m.Type == "message" {
-				messagesCh <- Message{
+				stdinCh <- Message{
 					Channel:         m.Channel,
 					Body:            m.Text,
 					IsChannel:       m.isChannel(),
@@ -113,15 +115,23 @@ func (a *SlackAdapter) Attach() (chan Message, chan error) {
 			}
 		}
 	}()
-	return messagesCh, errorsCh
-}
 
-func (a *SlackAdapter) Send(m Message) error {
-	sm := SlackMessage{
-		ID:      atomic.AddUint64(&a.counter, 1),
-		Type:    "message",
-		Channel: m.Channel,
-		Text:    m.Body,
-	}
-	return websocket.JSON.Send(a.ws, sm)
+	go func() {
+		for {
+			select {
+			case m := <-stdoutCh:
+				sm := SlackMessage{
+					ID:      atomic.AddUint64(&a.counter, 1),
+					Type:    "message",
+					Channel: m.Channel,
+					Text:    m.Body,
+				}
+				if err := websocket.JSON.Send(a.ws, sm); err != nil {
+					stderrCh <- err
+				}
+			}
+		}
+	}()
+
+	return stdinCh, stdoutCh, stderrCh
 }

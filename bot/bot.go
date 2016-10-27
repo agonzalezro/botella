@@ -1,6 +1,10 @@
 package bot
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"strconv"
+)
 
 type Message struct {
 	Channel         string
@@ -11,16 +15,28 @@ type Message struct {
 
 type Adapter interface {
 	GetID() string
-
-	Attach() (chan Message, chan error)
-	Send(Message) error
+	RunAndAttach() (stdin chan Message, stdout chan Message, stderr chan error)
 }
 
-func New(adapter, key string) (Adapter, error) {
-	switch adapter {
+func New(adapterName string, environment map[string]string) (Adapter, error) {
+	switch adapterName {
 	case "slack":
+		key, ok := environment["key"]
+		if !ok {
+			return nil, errors.New("key field is mandatory in environment conf for Slack")
+		}
 		return NewSlack(key)
+	case "http":
+		port, ok := environment["port"]
+		if !ok {
+			return nil, errors.New("port is mandatory in environment conf for HTTP")
+		}
+		iport, err := strconv.Atoi(port)
+		if err != nil {
+			return nil, fmt.Errorf("port in HTTP adapter should be an integer, it's: %s", port)
+		}
+		return NewHTTP(iport)
 	default:
-		return nil, fmt.Errorf("Adapter '%s' not found\n", adapter)
+		return nil, fmt.Errorf("Adapter '%s' not found\n", adapterName)
 	}
 }

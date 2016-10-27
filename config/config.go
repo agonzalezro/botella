@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
@@ -39,11 +38,12 @@ func NewFromFile(filePath string) (*Config, error) {
 	return c, err
 }
 
-func (c Config) EnvironmentFor(adapterName string) (map[string]string, error) {
-	for _, adapterConfig := range c.Adapters {
-		if adapterConfig.Name == adapterName {
-			return adapterConfig.Environment, nil
-		}
-	}
-	return nil, fmt.Errorf("Configuration for adapter %s not found", adapterName)
-}
+// TODO: remove this
+// func (c Config) EnvironmentFor(adapterName string) (map[string]string, error) {
+// 	for _, adapterConfig := range c.Adapters {
+// 		if adapterConfig.Name == adapterName {
+// 			return adapterConfig.Environment, nil
+// 		}
+// 	}
+// 	return nil, fmt.Errorf("Configuration for adapter %s not found", adapterName)
+// }

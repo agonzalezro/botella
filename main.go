@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/agonzalezro/ava/bot"
@@ -44,19 +44,7 @@ func ShouldBeRun(a bot.Adapter, p *plugin.Plugin, m *bot.Message) bool {
 	return true
 }
 
-func main() {
-	configPath, err := inferConfigPath()
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(-1)
-	}
-
-	config, err := config.NewFromFile(configPath)
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(-1)
-	}
-
+func loadPlugins(config *config.Config) []*plugin.Plugin {
 	var plugins []*plugin.Plugin
 	for _, pluginConfig := range config.Plugins {
 		plugin, err := plugin.New(
@@ -72,74 +60,77 @@ func main() {
 			log.Warningf("Error loading plugin (image: %s): %v", pluginConfig.Image, err)
 			continue
 		}
-		defer plugin.Stop()
 		plugins = append(plugins, plugin)
 	}
+	return plugins
+}
 
-	// TODO: this could be probably abstracted to be used as another adaptor (see Slack below)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Error(err)
-			return
-		}
-		log.Debugf("HTTP POST received: %s", body)
-
-		for _, p := range plugins {
-			pluginResponse, err := p.Run(string(body))
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-			w.Write([]byte(pluginResponse + "\n"))
-		}
-	})
-
-	e, err := config.EnvironmentFor("http")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-	host := fmt.Sprintf(":%s", e["PORT"])
-	go func() { log.Fatal(http.ListenAndServe(host, nil)) }()
-
-	log.Infof("HTTP adapter ready. Waiting for your POSTs at %s...", host)
-	// --- END OF TODO ---
-
-	// TODO: we shouldn't count that Slack is always configured
-	e, err = config.EnvironmentFor("slack")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-	slack, err := bot.New("slack", e["KEY"])
+func main() {
+	configPath, err := inferConfigPath()
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(-1)
 	}
-	log.Info("Slack adapter ready. Waiting for messages...")
 
-	messagesCh, errorsCh := slack.Attach()
-	for {
-		select {
-		case m := <-messagesCh:
-			log.Debugf("Slack message received: %v", m)
-			for _, p := range plugins {
-				if !ShouldBeRun(slack, p, &m) {
-					continue
-				}
-				pluginResponse, err := p.Run(m.Body)
-				if err != nil {
-					errorsCh <- err
-					continue
-				}
-				pluginResponse = strings.TrimSuffix(pluginResponse, "\n")
+	config, err := config.NewFromFile(configPath)
+	if err != nil {
+		fmt.Print(err)
+		os.Exit(-1)
+	}
 
-				log.Debugf("Plugin (%s) response: %s", p.Image, pluginResponse)
-				slack.Send(bot.Message{Channel: m.Channel, Body: pluginResponse})
-			}
-		case err := <-errorsCh:
-			log.Error(err)
+	plugins := loadPlugins(config)
+
+	var wg sync.WaitGroup
+
+	signalsCh := make(chan os.Signal, 1)
+	signal.Notify(signalsCh, os.Interrupt)
+
+	for _, adapterConfig := range config.Adapters {
+		wg.Add(1)
+
+		adapter, err := bot.New(adapterConfig.Name, adapterConfig.Environment)
+		if err != nil {
+			fmt.Printf("Error loading adapter %s: %v\n", adapterConfig.Name, err)
+			os.Exit(-1)
 		}
+		log.Infof("Adaptor %s ready.", adapterConfig.Name)
+
+		stdinCh, stdoutCh, stderrCh := adapter.RunAndAttach()
+		go func(stdinCh, stdoutCh chan bot.Message, stderrCh chan error) {
+			for {
+				select {
+				case m := <-stdinCh:
+					log.Debugf("Message received: %+v", m)
+					for _, p := range plugins {
+						// TODO: move the ShouldBeRun to the adapter interface
+						// if !ShouldBeRun(slack, p, &m) {
+						// 	continue
+						// }
+						pluginResponse, err := p.Run(m.Body)
+						if err != nil {
+							stderrCh <- err
+							continue
+						}
+						pluginResponse = strings.TrimSuffix(pluginResponse, "\n")
+
+						log.Debugf("Plugin (%s) response: %s", p.Image, pluginResponse)
+						stdoutCh <- bot.Message{Channel: m.Channel, Body: pluginResponse}
+					}
+				case err := <-stderrCh:
+					log.Error(err)
+				case <-signalsCh:
+					for i := 0; i < len(config.Adapters); i++ {
+						wg.Done()
+					}
+				}
+			}
+		}(stdinCh, stdoutCh, stderrCh)
+	}
+
+	wg.Wait()
+
+	log.Info("Teardown...")
+	for _, plugin := range plugins {
+		plugin.Stop()
 	}
 }
