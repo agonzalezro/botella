@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+
+	"github.com/agonzalezro/ava/plugin"
 )
 
 type Message struct {
@@ -16,6 +18,7 @@ type Message struct {
 type Adapter interface {
 	GetID() string
 	RunAndAttach() (stdin chan Message, stdout chan Message, stderr chan error)
+	ShouldRun(*plugin.Plugin, *Message) bool
 }
 
 func New(adapterName string, environment map[string]string) (Adapter, error) {

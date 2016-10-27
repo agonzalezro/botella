@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/agonzalezro/ava/plugin"
 )
 
 type HTTPAdapter struct {
@@ -17,6 +19,11 @@ func NewHTTP(port int) (*HTTPAdapter, error) {
 func (HTTPAdapter) GetID() string {
 	// Just implement the interface
 	return ""
+}
+
+func (HTTPAdapter) ShouldRun(_ *plugin.Plugin, _ *Message) bool {
+	// This adapter doesn't have permissions
+	return true
 }
 
 func (ha HTTPAdapter) RunAndAttach() (chan Message, chan Message, chan error) {

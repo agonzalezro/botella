@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/agonzalezro/ava/plugin"
+
 	"golang.org/x/net/websocket"
 )
 
@@ -85,6 +87,19 @@ func NewSlack(key string) (*SlackAdapter, error) {
 
 func (a *SlackAdapter) GetID() string {
 	return a.botID
+}
+
+func (a *SlackAdapter) ShouldRun(p *plugin.Plugin, m *Message) bool {
+	if p.RunOnlyOnChannels {
+		return m.IsChannel
+	}
+	if p.RunOnlyOnDirectMessages {
+		return m.IsDirectMessage
+	}
+	if p.RunOnlyOnMentions {
+		return strings.Contains(m.Body, a.GetID())
+	}
+	return true
 }
 
 func (a *SlackAdapter) getSlackMessage() (*SlackMessage, error) {

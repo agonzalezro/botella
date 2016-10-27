@@ -31,19 +31,6 @@ func inferConfigPath() (string, error) {
 	return "", fmt.Errorf("No %s file found!\n", strings.Join(paths, " or "))
 }
 
-func ShouldBeRun(a bot.Adapter, p *plugin.Plugin, m *bot.Message) bool {
-	if p.RunOnlyOnChannels {
-		return m.IsChannel
-	}
-	if p.RunOnlyOnDirectMessages {
-		return m.IsDirectMessage
-	}
-	if p.RunOnlyOnMentions {
-		return strings.Contains(m.Body, a.GetID())
-	}
-	return true
-}
-
 func loadPlugins(config *config.Config) []*plugin.Plugin {
 	var plugins []*plugin.Plugin
 	for _, pluginConfig := range config.Plugins {
@@ -96,22 +83,23 @@ func main() {
 		log.Infof("Adaptor %s ready.", adapterConfig.Name)
 
 		stdinCh, stdoutCh, stderrCh := adapter.RunAndAttach()
-		go func(stdinCh, stdoutCh chan bot.Message, stderrCh chan error) {
+		go func(adapter bot.Adapter, stdinCh, stdoutCh chan bot.Message, stderrCh chan error) {
 			for {
 				select {
 				case m := <-stdinCh:
 					log.Debugf("Message received: %+v", m)
 					for _, p := range plugins {
-						// TODO: move the ShouldBeRun to the adapter interface
-						// if !ShouldBeRun(slack, p, &m) {
-						// 	continue
-						// }
+						if !adapter.ShouldRun(p, &m) {
+							log.Debugf("Not running plugin (%s) for %+v", p.Image, m)
+							continue
+						}
 						pluginResponse, err := p.Run(m.Body)
 						if err != nil {
 							stderrCh <- err
 							continue
 						}
 						pluginResponse = strings.TrimSuffix(pluginResponse, "\n")
+						log.Debugf("Running plugin (%s) for: %+v", p.Image, m)
 
 						log.Debugf("Plugin (%s) response: %s", p.Image, pluginResponse)
 						stdoutCh <- bot.Message{Channel: m.Channel, Body: pluginResponse}
@@ -124,7 +112,7 @@ func main() {
 					}
 				}
 			}
-		}(stdinCh, stdoutCh, stderrCh)
+		}(adapter, stdinCh, stdoutCh, stderrCh)
 	}
 
 	wg.Wait()
