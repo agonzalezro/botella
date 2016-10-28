@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/agonzalezro/ava/bot"
+	"github.com/agonzalezro/ava/adapter"
 	"github.com/agonzalezro/ava/config"
 	"github.com/agonzalezro/ava/plugin"
 )
@@ -53,10 +53,10 @@ func loadPlugins(config *config.Config) ([]*plugin.Plugin, error) {
 	return plugins, nil
 }
 
-func loadAdapters(config *config.Config) ([]bot.Adapter, error) {
-	var adapters []bot.Adapter
+func loadAdapters(config *config.Config) ([]adapter.Adapter, error) {
+	var adapters []adapter.Adapter
 	for _, adapterConfig := range config.Adapters {
-		adapter, err := bot.New(adapterConfig.Name, adapterConfig.Environment)
+		adapter, err := adapter.New(adapterConfig.Name, adapterConfig.Environment)
 		if err != nil {
 			return nil, fmt.Errorf("Error loading adapter (%s): %v", adapterConfig.Name, err)
 		}
@@ -67,36 +67,36 @@ func loadAdapters(config *config.Config) ([]bot.Adapter, error) {
 	return adapters, nil
 }
 
-func listenAndReply(adapters []bot.Adapter, plugins []*plugin.Plugin) {
+func listenAndReply(adapters []adapter.Adapter, plugins []*plugin.Plugin) {
 	var wg sync.WaitGroup
 	signalsCh := make(chan os.Signal, 1)
 	signal.Notify(signalsCh, os.Interrupt)
 
-	for _, adapter := range adapters {
+	for _, a := range adapters {
 		wg.Add(1)
 
-		stdinCh, stdoutCh, stderrCh := adapter.RunAndAttach()
-		go func(adapter bot.Adapter, stdinCh, stdoutCh chan bot.Message, stderrCh chan error) {
+		stdinCh, stdoutCh, stderrCh := a.RunAndAttach()
+		go func(a adapter.Adapter, stdinCh, stdoutCh chan adapter.Message, stderrCh chan error) {
 			for {
 				select {
 				case m := <-stdinCh:
 					log.Debugf("Message received: %+v", m)
 					for _, p := range plugins {
-						if !adapter.ShouldRun(p, &m) {
+						if !a.ShouldRun(p, &m) {
 							log.Debugf("Not running plugin (%s) for: %+v", p.Image, m)
 							continue
 						}
 						log.Debugf("Running plugin (%s) for: %+v", p.Image, m)
 
-						pluginResponse, err := p.Run(m.Body)
+						resp, err := p.Run(m.Body)
 						if err != nil {
 							stderrCh <- err
 							continue
 						}
-						pluginResponse = strings.TrimSuffix(pluginResponse, "\n")
+						resp = strings.TrimSuffix(resp, "\n")
 
-						log.Debugf("Plugin (%s) response: %s", p.Image, pluginResponse)
-						stdoutCh <- bot.Message{Channel: m.Channel, Body: pluginResponse}
+						log.Debugf("Plugin (%s) response: %s", p.Image, resp)
+						stdoutCh <- adapter.Message{Channel: m.Channel, Body: resp}
 					}
 				case err := <-stderrCh:
 					log.Error(err)
@@ -106,7 +106,7 @@ func listenAndReply(adapters []bot.Adapter, plugins []*plugin.Plugin) {
 					}
 				}
 			}
-		}(adapter, stdinCh, stdoutCh, stderrCh)
+		}(a, stdinCh, stdoutCh, stderrCh)
 	}
 
 	wg.Wait()
