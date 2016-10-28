@@ -31,56 +31,49 @@ func inferConfigPath() (string, error) {
 	return "", fmt.Errorf("No %s file found!\n", strings.Join(paths, " or "))
 }
 
-func loadPlugins(config *config.Config) []*plugin.Plugin {
+func loadPlugins(config *config.Config) ([]*plugin.Plugin, error) {
 	var plugins []*plugin.Plugin
 	for _, pluginConfig := range config.Plugins {
 		plugin, err := plugin.New(
 			pluginConfig.Image,
 			pluginConfig.Environment,
 		)
+		if err != nil {
+			return nil, fmt.Errorf("Error loading plugin (image: %s): %v", pluginConfig.Image, err)
+		}
+
 		// TODO: this is a little bit ugly
 		plugin.RunOnlyOnChannels = pluginConfig.OnlyChannels
 		plugin.RunOnlyOnDirectMessages = pluginConfig.OnlyDirectMessages
 		plugin.RunOnlyOnMentions = pluginConfig.OnlyMentions
 
-		if err != nil {
-			log.Warningf("Error loading plugin (image: %s): %v", pluginConfig.Image, err)
-			continue
-		}
+		log.Infof("Plugin (%s) loaded.", pluginConfig.Image)
 		plugins = append(plugins, plugin)
 	}
-	return plugins
+	return plugins, nil
 }
 
-func main() {
-	configPath, err := inferConfigPath()
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(-1)
+func loadAdapters(config *config.Config) ([]bot.Adapter, error) {
+	var adapters []bot.Adapter
+	for _, adapterConfig := range config.Adapters {
+		adapter, err := bot.New(adapterConfig.Name, adapterConfig.Environment)
+		if err != nil {
+			return nil, fmt.Errorf("Error loading adapter (%s): %v", adapterConfig.Name, err)
+		}
+
+		log.Infof("Adapter (%s) loaded.", adapterConfig.Name)
+		adapters = append(adapters, adapter)
 	}
+	return adapters, nil
+}
 
-	config, err := config.NewFromFile(configPath)
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(-1)
-	}
-
-	plugins := loadPlugins(config)
-
+func listenAndReply(adapters []bot.Adapter, plugins []*plugin.Plugin) {
 	var wg sync.WaitGroup
-
 	signalsCh := make(chan os.Signal, 1)
 	signal.Notify(signalsCh, os.Interrupt)
 
-	for _, adapterConfig := range config.Adapters {
+	for _, adapter := range adapters {
 		wg.Add(1)
-
-		adapter, err := bot.New(adapterConfig.Name, adapterConfig.Environment)
-		if err != nil {
-			fmt.Printf("Error loading adapter %s: %v\n", adapterConfig.Name, err)
-			os.Exit(-1)
-		}
-		log.Infof("Adaptor %s ready.", adapterConfig.Name)
 
 		stdinCh, stdoutCh, stderrCh := adapter.RunAndAttach()
 		go func(adapter bot.Adapter, stdinCh, stdoutCh chan bot.Message, stderrCh chan error) {
@@ -90,16 +83,17 @@ func main() {
 					log.Debugf("Message received: %+v", m)
 					for _, p := range plugins {
 						if !adapter.ShouldRun(p, &m) {
-							log.Debugf("Not running plugin (%s) for %+v", p.Image, m)
+							log.Debugf("Not running plugin (%s) for: %+v", p.Image, m)
 							continue
 						}
+						log.Debugf("Running plugin (%s) for: %+v", p.Image, m)
+
 						pluginResponse, err := p.Run(m.Body)
 						if err != nil {
 							stderrCh <- err
 							continue
 						}
 						pluginResponse = strings.TrimSuffix(pluginResponse, "\n")
-						log.Debugf("Running plugin (%s) for: %+v", p.Image, m)
 
 						log.Debugf("Plugin (%s) response: %s", p.Image, pluginResponse)
 						stdoutCh <- bot.Message{Channel: m.Channel, Body: pluginResponse}
@@ -107,7 +101,7 @@ func main() {
 				case err := <-stderrCh:
 					log.Error(err)
 				case <-signalsCh:
-					for i := 0; i < len(config.Adapters); i++ {
+					for i := 0; i < len(adapters); i++ {
 						wg.Done()
 					}
 				}
@@ -121,4 +115,32 @@ func main() {
 	for _, plugin := range plugins {
 		plugin.Stop()
 	}
+}
+
+func main() {
+	configPath, err := inferConfigPath()
+	if err != nil {
+		log.Error(err)
+		os.Exit(-1)
+	}
+
+	config, err := config.NewFromFile(configPath)
+	if err != nil {
+		log.Error(err)
+		os.Exit(-1)
+	}
+
+	adapters, err := loadAdapters(config)
+	if err != nil {
+		log.Error(err)
+		os.Exit(-1)
+	}
+
+	plugins, err := loadPlugins(config)
+	if err != nil {
+		log.Error(err)
+		os.Exit(-1)
+	}
+
+	listenAndReply(adapters, plugins)
 }
