@@ -1,11 +1,11 @@
 package adapter
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/agonzalezro/ava/plugin"
+	"github.com/agonzalezro/ava/utils"
 )
 
 type Message struct {
@@ -24,15 +24,15 @@ type Adapter interface {
 func New(adapterName string, environment map[string]string) (Adapter, error) {
 	switch adapterName {
 	case "slack":
-		key, ok := environment["key"]
-		if !ok {
-			return nil, errors.New("key field is mandatory in environment conf for Slack")
+		key, err := utils.GetFromEnvOrFromMap(adapterName, environment, "key")
+		if err != nil {
+			return nil, err
 		}
 		return NewSlack(key)
 	case "http":
-		port, ok := environment["port"]
-		if !ok {
-			return nil, errors.New("port is mandatory in environment conf for HTTP")
+		port, err := utils.GetFromEnvOrFromMap(adapterName, environment, "port")
+		if err != nil {
+			return nil, err
 		}
 		iport, err := strconv.Atoi(port)
 		if err != nil {

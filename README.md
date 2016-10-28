@@ -51,6 +51,8 @@ To get that key you could just go to https://your-org-here.slack.com/services/ne
 
 Probably, while you were creating the bot in Slack you saw that you could define its profile pic and name, be original!
 
+**Note:** if for security reasons you prefer to set that API key as an environment variable you can use the environment variable `SLACK_KEY`. 
+
 #### HTTP
 
 The HTTP adapter is more easy to setup, you just need to define a port where you want it to be listening:
@@ -59,7 +61,7 @@ The HTTP adapter is more easy to setup, you just need to define a port where you
 adapters:
   - name: http
     environment:
-      port: 8080
+      port: 8080 # You can also set HTTP_PORT instead setting it here
   ...
 ```
 
@@ -94,6 +96,26 @@ It has 3 basic sections:
     - `only_channels`: will make the bot just react when the message was send in a channel.
     - `only_direct_messages`: you know how this goes...
 
+**Note:** If you want you can read the values of the environment keys from the host/system environment keys. Let's explain with an example:
+
+```
+...
+plugins:
+  - image: agonzalezro/ava-test
+    environment:
+      KEY:
+```
+
+In the previous configuration we say that we want our container to receive an environment variable called `KEY` but we don't set any value to it. If we want to give it one value we will just need to run ava like this:
+
+```
+AGONZALEZRO_AVA_TEST_KEY=xxx ./ava
+```
+
+Of course, how you set those variables is up to you, you don't need to do it inline as explained in the example.
+
+Also note that all the special characters in the image name are being replaced by `_`s for compatibility reasons.
+
 Available plugins
 -----------------
 
@@ -102,7 +124,7 @@ Available plugins
 | [agonzalezro/ava-test](https://hub.docker.com/r/agonzalezro/ava-test/) | It's a test plugin that echoes whatever you write to it and shows the value of an environment variable called `ENV`. |
 
 
-Developing plugins
+Developing pluginse
 ------------------
 
 Developing a plugin for Ava is extremely simple, you will need to write a program and pack it with Docker.

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/agonzalezro/ava/utils"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -22,9 +23,17 @@ type Plugin struct {
 	RunOnlyOnMentions       bool
 }
 
-func environmentAsArrayOfString(environment map[string]string) []string {
-	var arrayOfEnvs []string
+func environmentAsArrayOfString(image string, environment map[string]string) []string {
+	var (
+		arrayOfEnvs []string
+		err         error
+	)
 	for k, v := range environment {
+		// We want to override it with a value from the environment
+		if v == "" {
+			v, err = utils.GetFromEnvOrFromMap(image, nil, k)
+			log.Warning(err)
+		}
 		arrayOfEnvs = append(arrayOfEnvs, fmt.Sprintf("%s=%s", k, v))
 	}
 	return arrayOfEnvs
@@ -39,7 +48,7 @@ func New(image string, environment map[string]string) (*Plugin, error) {
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Config: &docker.Config{
 			Image:        image,
-			Env:          environmentAsArrayOfString(environment),
+			Env:          environmentAsArrayOfString(image, environment),
 			AttachStdin:  true, // TODO: not sure what of these are needed
 			AttachStdout: true,
 			OpenStdin:    true,
