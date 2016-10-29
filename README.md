@@ -30,8 +30,7 @@ plugins:
 
 You can easily see that we are defining a list of adapter (how to connect with the bot) and plugins that are going to be run when the bot receives a message.
 
-Adapters
-~~~~~~~~
+### Adapters
 
 At the moment of writing we support two types of adapters:
 
@@ -73,8 +72,7 @@ For example, if we are running it in localhost in the port 8080 a good way to te
 $ echo "hi Ava!"|http -f GET localhost:8080 Content-Type:text/plain
 ```
 
-Plugins
-~~~~~~~
+### Plugins
 
 The plugins is just a list of docker images. Check the previous example:
 
@@ -133,8 +131,7 @@ What are the characteristics that my program needs to follow? It will need to re
 
 In the [examples/](examples/) folder you will find an example plugin called `ava-test`. This plugin is uploaded to my Docker Hub so you can use it without building it, but it's a good place to learn.
 
-Examples
-~~~~~~~~
+### Examples
 
 In the [examples/](examples/) folder you can find a simple plugin that does two important things:
 
@@ -145,8 +142,7 @@ In the [examples/](examples/) folder you can find a simple plugin that does two 
 Developing Ava
 --------------
 
-Compiling
-~~~~~~~~~
+### Compiling
 
 You will need [Go](https://golang.org/) and [glide](https://github.com/Masterminds/glide):
 
@@ -155,8 +151,7 @@ $ glide install
 $ go build
 ```
 
-Testing
-~~~~~~~
+### Testing
 
 ```bash
 $ go test
