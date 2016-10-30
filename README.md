@@ -122,7 +122,7 @@ Available plugins
 | [agonzalezro/ava-test](https://hub.docker.com/r/agonzalezro/ava-test/) | It's a test plugin that echoes whatever you write to it and shows the value of an environment variable called `ENV`. |
 
 
-Developing pluginse
+Developing plugins
 ------------------
 
 Developing a plugin for Ava is extremely simple, you will need to write a program and pack it with Docker.
