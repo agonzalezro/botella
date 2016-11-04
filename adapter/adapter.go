@@ -16,7 +16,6 @@ type Message struct {
 }
 
 type Adapter interface {
-	GetID() string
 	RunAndAttach() (stdin chan Message, stdout chan Message, stderr chan error)
 	ShouldRun(*plugin.Plugin, *Message) bool
 }

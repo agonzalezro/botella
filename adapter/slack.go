@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"sync/atomic"
 
 	"github.com/agonzalezro/ava/plugin"
 
@@ -22,12 +21,10 @@ const (
 type SlackAdapter struct {
 	ws *websocket.Conn
 
-	botID   string
-	counter uint64
+	botID string
 }
 
 type SlackMessage struct {
-	ID      uint64 `json:"id"`
 	Type    string `json:"type"`
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
@@ -85,11 +82,7 @@ func NewSlack(key string) (*SlackAdapter, error) {
 	return &SlackAdapter{ws: ws, botID: p.Self.ID}, nil
 }
 
-func (a *SlackAdapter) GetID() string {
-	return a.botID
-}
-
-func (a *SlackAdapter) ShouldRun(p *plugin.Plugin, m *Message) bool {
+func (sa *SlackAdapter) ShouldRun(p *plugin.Plugin, m *Message) bool {
 	if p.RunOnlyOnChannels {
 		return m.IsChannel
 	}
@@ -97,25 +90,25 @@ func (a *SlackAdapter) ShouldRun(p *plugin.Plugin, m *Message) bool {
 		return m.IsDirectMessage
 	}
 	if p.RunOnlyOnMentions {
-		return strings.Contains(m.Body, a.GetID())
+		return strings.Contains(m.Body, sa.botID)
 	}
 	return true
 }
 
-func (a *SlackAdapter) getSlackMessage() (*SlackMessage, error) {
+func (sa *SlackAdapter) getSlackMessage() (*SlackMessage, error) {
 	m := SlackMessage{}
-	err := websocket.JSON.Receive(a.ws, &m)
+	err := websocket.JSON.Receive(sa.ws, &m)
 	return &m, err
 }
 
-func (a *SlackAdapter) RunAndAttach() (chan Message, chan Message, chan error) {
+func (sa *SlackAdapter) RunAndAttach() (chan Message, chan Message, chan error) {
 	stdinCh := make(chan Message, 1)
 	stdoutCh := make(chan Message, 1)
 	stderrCh := make(chan error, 1)
 
 	go func() {
 		for {
-			m, err := a.getSlackMessage()
+			m, err := sa.getSlackMessage()
 			if err != nil {
 				stderrCh <- err
 				continue
@@ -136,12 +129,11 @@ func (a *SlackAdapter) RunAndAttach() (chan Message, chan Message, chan error) {
 			select {
 			case m := <-stdoutCh:
 				sm := SlackMessage{
-					ID:      atomic.AddUint64(&a.counter, 1),
 					Type:    "message",
 					Channel: m.Channel,
 					Text:    m.Body,
 				}
-				if err := websocket.JSON.Send(a.ws, sm); err != nil {
+				if err := websocket.JSON.Send(sa.ws, sm); err != nil {
 					stderrCh <- err
 				}
 			}

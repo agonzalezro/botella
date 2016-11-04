@@ -16,11 +16,6 @@ func NewHTTP(port int) (*HTTPAdapter, error) {
 	return &HTTPAdapter{port}, nil
 }
 
-func (HTTPAdapter) GetID() string {
-	// Just implement the interface
-	return ""
-}
-
 func (HTTPAdapter) ShouldRun(_ *plugin.Plugin, _ *Message) bool {
 	// This adapter doesn't have permissions
 	return true
