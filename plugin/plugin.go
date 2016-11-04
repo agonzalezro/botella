@@ -45,6 +45,13 @@ func New(image string, environment map[string]string) (*Plugin, error) {
 		return nil, err
 	}
 
+	if err := client.PullImage(
+		docker.PullImageOptions{Repository: image},
+		docker.AuthConfiguration{},
+	); err != nil {
+		return nil, err
+	}
+
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Config: &docker.Config{
 			Image:        image,
