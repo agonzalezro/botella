@@ -154,5 +154,5 @@ $ go build
 ### Testing
 
 ```bash
-$ go test
+$ go test $(glide novendor)
 ```
