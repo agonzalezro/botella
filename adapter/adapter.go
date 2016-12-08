@@ -9,8 +9,13 @@ import (
 )
 
 type Message struct {
-	Channel         string
-	Body            string
+	// Emitter is the emitter of the message, in the case of Slack is clear, in
+	// some other cases as for example the http adapter, it doesn't need to be set
+	Emitter string
+	// Receiver is the receiver of the message, for example: a channel ID
+	Receiver string
+	Body     string
+
 	IsChannel       bool
 	IsDirectMessage bool
 }

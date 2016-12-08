@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/agonzalezro/ava/plugin"
+	"github.com/twinj/uuid"
 )
 
 type HTTPAdapter struct {
@@ -32,12 +33,19 @@ func (ha HTTPAdapter) RunAndAttach() (chan Message, chan Message, chan error) {
 			stderrCh <- err
 			return
 		}
-		stdinCh <- Message{Body: string(body)}
+		receiverID := uuid.NewV4().String()
+		stdinCh <- Message{Receiver: receiverID, Body: string(body)}
 
-		// FIXME: this will just return one plugin response!
-		// And actually it doesn't even need to be the one that ask for it :D
-		m := <-stdoutCh
-		w.Write([]byte(m.Body + "\n"))
+		// FIXME: this loop isn't probably the best solution.
+		// FIXME #2: it will just return one plugin response.
+		for {
+			m := <-stdoutCh
+			if m.Receiver == receiverID {
+				w.Write([]byte(m.Body + "\n"))
+				return
+			}
+			stdoutCh <- m
+		}
 	})
 
 	go func() {

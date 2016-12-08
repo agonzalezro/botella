@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -21,6 +22,31 @@ type Plugin struct {
 	RunOnlyOnChannels       bool
 	RunOnlyOnDirectMessages bool
 	RunOnlyOnMentions       bool
+}
+
+type Input struct {
+	Version  int    `json:"version,omitempty"`
+	Emitter  string `json:"channel,omitempty"`
+	Receiver string `json:"receiver,omitempty"`
+	Body     string `json:"body"`
+}
+
+func NewInput(emitter, receiver, body string) Input {
+	return Input{
+		Version:  -1, // TODO: not used yet
+		Emitter:  emitter,
+		Receiver: receiver,
+		Body:     body,
+	}
+}
+
+func (i Input) JSON() string {
+	b, err := json.Marshal(i)
+	if err != nil {
+		log.Warning(err)
+		return ""
+	}
+	return string(b)
 }
 
 func environmentAsArrayOfString(image string, environment map[string]string) []string {
@@ -45,6 +71,7 @@ func New(image string, environment map[string]string) (*Plugin, error) {
 		return nil, err
 	}
 
+	// TODO: don't always pull images, check imagePullPolicy from yaml
 	if err := client.PullImage(
 		docker.PullImageOptions{Repository: image},
 		docker.AuthConfiguration{},
@@ -80,7 +107,7 @@ func (p *Plugin) Stop() error {
 		docker.RemoveContainerOptions{ID: p.container.ID, Force: true})
 }
 
-func (p *Plugin) Run(line string) (string, error) {
+func (p *Plugin) Run(input Input) (string, error) {
 	// TODO: not sure if we should do this or keep an ongoing container running
 	if err := p.client.StartContainer(p.container.ID, nil); err != nil {
 		return "", err
@@ -91,7 +118,7 @@ func (p *Plugin) Run(line string) (string, error) {
 		Container:    p.container.ID,
 		Stdin:        true,
 		Stdout:       true,
-		InputStream:  strings.NewReader(line),
+		InputStream:  strings.NewReader(input.JSON()),
 		OutputStream: &buf,
 		Stream:       true,
 	}); err != nil {

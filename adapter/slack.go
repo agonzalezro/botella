@@ -26,6 +26,7 @@ type SlackAdapter struct {
 
 type SlackMessage struct {
 	Type    string `json:"type"`
+	User    string `json:"user"`
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
 }
@@ -115,7 +116,8 @@ func (sa *SlackAdapter) RunAndAttach() (chan Message, chan Message, chan error) 
 			}
 			if m.Type == "message" {
 				stdinCh <- Message{
-					Channel:         m.Channel,
+					Emitter:         m.User,
+					Receiver:        m.Channel,
 					Body:            m.Text,
 					IsChannel:       m.isChannel(),
 					IsDirectMessage: m.isDirectMessage(),
@@ -130,7 +132,7 @@ func (sa *SlackAdapter) RunAndAttach() (chan Message, chan Message, chan error) 
 			case m := <-stdoutCh:
 				sm := SlackMessage{
 					Type:    "message",
-					Channel: m.Channel,
+					Channel: m.Receiver,
 					Text:    m.Body,
 				}
 				if err := websocket.JSON.Send(sa.ws, sm); err != nil {

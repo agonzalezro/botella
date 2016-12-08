@@ -6,3 +6,4 @@ import:
 - package: github.com/fsouza/go-dockerclient
 - package: github.com/Sirupsen/logrus
   version: ^0.10.0
+- package: github.com/twinj/uuid
