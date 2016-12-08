@@ -66,10 +66,10 @@ adapters:
 
 Now you can start POSTing, GETting or whatever to your bot in the `/` path of wherever you are running it.
 
-For example, if we are running it in localhost in the port 8080 a good way to test it would be using [httpie](https://httpie.org/):
+For example, if we are running it in localhost in the port 8080 a good way to test it would be using curl:
 
 ```bash
-$ echo "hi Ava!"|http -f GET localhost:8080 Content-Type:text/plain
+curl -X POST -d message=hi localhost:8080
 ```
 
 ### Plugins
