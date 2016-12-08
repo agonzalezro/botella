@@ -48,6 +48,7 @@ func loadPlugins(config *config.Config) ([]*plugin.Plugin, error) {
 		plugin.RunOnlyOnMentions = pluginConfig.OnlyMentions
 
 		log.Infof("Plugin (%s) loaded.", pluginConfig.Image)
+		log.Debugf("Plugin (%s) config: %+v", pluginConfig.Image, pluginConfig)
 		plugins = append(plugins, plugin)
 	}
 	return plugins, nil
@@ -62,6 +63,7 @@ func loadAdapters(config *config.Config) ([]adapter.Adapter, error) {
 		}
 
 		log.Infof("Adapter (%s) loaded.", adapterConfig.Name)
+		log.Debugf("Adapter (%s) config: %+v", adapterConfig.Name, adapterConfig)
 		adapters = append(adapters, adapter)
 	}
 	return adapters, nil
