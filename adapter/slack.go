@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/agonzalezro/ava/plugin"
-
 	"golang.org/x/net/websocket"
+
+	"github.com/agonzalezro/botella/plugin"
 )
 
 const (

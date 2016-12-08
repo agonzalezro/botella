@@ -7,7 +7,7 @@ adapters:
       port: 8080
 
 plugins:
-  - image: agonzalezro/ava-test
+  - image: agonzalezro/botella-test
     environment:
       KEY: this-is-a-secret
     only_mentions: true

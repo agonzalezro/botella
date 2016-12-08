@@ -5,8 +5,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/agonzalezro/ava/plugin"
 	"github.com/twinj/uuid"
+
+	"github.com/agonzalezro/botella/plugin"
 )
 
 type HTTPAdapter struct {

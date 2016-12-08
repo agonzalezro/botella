@@ -1,16 +1,14 @@
-Ava
-===
-
-_Ava is a temporal name since it already clashes with an important JS test runner. New names are welcomed!_
+Botella
+=======
 
 **Please, be aware that this is a beta project, don't try to run it for important stuff unless you know what you are doing!**
 
-Slack bot with plugins. What's the selling point then? The plugins are Docker containers and the bot interacts with them via stdin/stdout. In plain English that means that you can develop your plugins in whatever language you want and you will just need to pack them as Docker container to be able to use them with Ava.
+Slack bot with plugins. What's the selling point then? The plugins are Docker containers and the bot interacts with them via stdin/stdout. In plain English that means that you can develop your plugins in whatever language you want and you will just need to pack them as Docker container to be able to use them with Botella.
 
 Usage
 -----
 
-You just need to be sure that you have a `ava.yaml` file in the path where you run it. This file could look like:
+You just need to be sure that you have a botella.yaml` file in the path where you run it. This file could look like:
 
 ```yaml
 adapters:
@@ -22,7 +20,7 @@ adapters:
       port: 8080
 
 plugins:
-  - image: agonzalezro/ava-test
+  - image: agonzalezro/botella-test
     environment:
       KEY: this-is-a-secret
     only_mentions: true
@@ -46,7 +44,7 @@ adapters:
   ...
 ```
 
-To get that key you could just go to https://your-org-here.slack.com/services/new/bot and create a new bot, after configuring it you will see an API Token, copy/paste it in your `ava.yaml`.
+To get that key you could just go to https://your-org-here.slack.com/services/new/bot and create a new bot, after configuring it you will see an API Token, copy/paste it in your `botella.yaml`.
 
 Probably, while you were creating the bot in Slack you saw that you could define its profile pic and name, be original!
 
@@ -79,7 +77,7 @@ The plugins is just a list of docker images. Check the previous example:
 ```yaml
 ...
 plugins:
-  - image: agonzalezro/ava-test
+  - image: agonzalezro/botella-test
     environment:
       KEY: this-is-a-secret
     only_mentions: true
@@ -99,15 +97,15 @@ It has 3 basic sections:
 ```
 ...
 plugins:
-  - image: agonzalezro/ava-test
+  - image: agonzalezro/botella-test
     environment:
       KEY:
 ```
 
-In the previous configuration we say that we want our container to receive an environment variable called `KEY` but we don't set any value to it. If we want to give it one value we will just need to run ava like this:
+In the previous configuration we say that we want our container to receive an environment variable called `KEY` but we don't set any value to it. If we want to give it one value we will just need to run Botella like this:
 
 ```
-AGONZALEZRO_AVA_TEST_KEY=xxx ./ava
+AGONZALEZRO_BOTELLA_TEST_KEY=xxx ./botella
 ```
 
 Of course, how you set those variables is up to you, you don't need to do it inline as explained in the example.
@@ -119,28 +117,29 @@ Available plugins
 
 | Image | Description |
 | ----- | ----------- |
-| [agonzalezro/ava-test](https://hub.docker.com/r/agonzalezro/ava-test/) | It's a test plugin that echoes whatever you write to it and shows the value of an environment variable called `ENV`. |
+| [agonzalezro/botella-test](https://hub.docker.com/r/agonzalezro/botella-test/) | It's a test plugin that echoes whatever you write to it and shows the value of an environment variable called `ENV`. |
 
+Please, if you create a cool plugin that can be listed here because it's public, let me know with a PR!
 
 Developing plugins
 ------------------
 
-Developing a plugin for Ava is extremely simple, you will need to write a program and pack it with Docker.
+Developing a plugin for Botella is extremely simple, you will need to write a program and pack it with Docker.
 
 What are the characteristics that my program needs to follow? It will need to read a line (or several) from stdin and write a response to stdout.
 
-In the [examples/](examples/) folder you will find an example plugin called `ava-test`. This plugin is uploaded to my Docker Hub so you can use it without building it, but it's a good place to learn.
+In the [examples/](examples/) folder you will find an example plugin called `botella-test`. This plugin is uploaded to my Docker Hub so you can use it without building it, but it's a good place to learn.
 
 ### Examples
 
 In the [examples/](examples/) folder you can find a simple plugin that does two important things:
 
-- it will echo whatever message is send to it, thinking out of the box you could do whatever you want with that input (from the container stdin) and output whatever you want instead just an echo.
-- it shows the value of an environment variable set on the `ava.yaml` file. What we are trying to show with this? That you can pass secrets around (from the `ava.yaml` to the container) without compromise them. Imagine that the container needs an AWS key, just add it to your `ava.yaml` and read the value from inside the container.
+- it will echo whatever message is send to it, thinking out of the box you could do whatever you want with that input (from the container stdin) and output whatever you want instead just an echo. It will also use the fantastic [jq](https://stedolan.github.io/jq/) to parse the JSON. 
+- it shows the value of an environment variable set on the `botella.yaml` file. What we are trying to show with this? That you can pass secrets around (from the `botella.yaml` to the container) without compromise them. Imagine that the container needs an AWS key, just add it to your `botella.yaml` and read the value from inside the container.
 
 
-Developing Ava
---------------
+Developing Botella
+------------------
 
 ### Compiling
 

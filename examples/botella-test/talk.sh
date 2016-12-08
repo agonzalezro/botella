@@ -4,7 +4,7 @@ read line
 
 echo "Hi!"
 echo ""
-echo "You can use environment variable for sharing secrets with me. For example, in your ava.yml you specified a var called KEY with value: $KEY"
+echo "You can use environment variable for sharing secrets with me. For example, in your botella.yml you specified a var called KEY with value: $KEY"
 echo ""
 echo "I also received this as input: $line"
 echo ""

@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/agonzalezro/ava/utils"
 	"github.com/fsouza/go-dockerclient"
+
+	"github.com/agonzalezro/botella/utils"
 )
 
 type Plugin struct {

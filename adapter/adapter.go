@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/agonzalezro/ava/plugin"
-	"github.com/agonzalezro/ava/utils"
+	"github.com/agonzalezro/botella/plugin"
+	"github.com/agonzalezro/botella/utils"
 )
 
 type Message struct {

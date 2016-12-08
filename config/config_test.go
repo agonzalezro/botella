@@ -18,7 +18,7 @@ adapters:
       PORT: 8080
 
 plugins:
-  - image: agonzalezro/ava-test
+  - image: agonzalezro/botella-test
     environment:
       KEY: this-is-a-secret
     only_mentions: true
@@ -55,7 +55,7 @@ func TestNewFromFile(t *testing.T) {
 
 	assert.Equal(len(config.Plugins), 1)
 	plugin := config.Plugins[0]
-	assert.Equal("agonzalezro/ava-test", plugin.Image)
+	assert.Equal("agonzalezro/botella-test", plugin.Image)
 	assert.Equal(len(plugin.Environment), 1)
 	assert.Equal("this-is-a-secret", plugin.Environment["KEY"])
 

@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/agonzalezro/ava/adapter"
-	"github.com/agonzalezro/ava/config"
-	"github.com/agonzalezro/ava/plugin"
+	"github.com/agonzalezro/botella/adapter"
+	"github.com/agonzalezro/botella/config"
+	"github.com/agonzalezro/botella/plugin"
 )
 
 func init() {
@@ -20,7 +20,7 @@ func init() {
 }
 
 func inferConfigPath() (string, error) {
-	paths := []string{"ava.yml", "ava.yaml"}
+	paths := []string{"botella.yml", "botella.yaml"}
 
 	for _, path := range paths {
 		if _, err := os.Stat(path); err == nil {

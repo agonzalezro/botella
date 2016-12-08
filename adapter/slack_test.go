@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/agonzalezro/ava/plugin"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/agonzalezro/botella/plugin"
 )
 
 func TestChannelOrDirectMessage(t *testing.T) {

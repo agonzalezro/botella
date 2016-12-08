@@ -3,8 +3,9 @@ package main
 import (
 	"testing"
 
-	"github.com/agonzalezro/ava/config"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/agonzalezro/botella/config"
 )
 
 func TestLoadPlugins(t *testing.T) {
