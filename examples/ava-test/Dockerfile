@@ -1,4 +1,6 @@
-FROM busybox
+FROM alpine:3.4
 
-ADD echoer.sh /
-CMD /echoer.sh
+RUN apk add --no-cache jq
+
+ADD talk.sh /
+CMD /talk.sh
