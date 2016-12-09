@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>botella - Your bot with Docker plugins</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/one-page-wonder.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-right" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li>
+              <a href="https://github.com/agonzalezro/botella/blob/master/README.md">Docs</a>
+            </li>
+            <li>
+              <a href="https://github.com/agonzalezro/botella">Code</a>
+            </li>
+            <li>
+              <a href="https://github.com/agonzalezro/botella/releases">Download</a>
+            </li>
+          </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+
+    <!-- Full Width Image Header -->
+    <header class="header-image">
+      <div class="headline">
+        <div class="container">
+          <h1>botella</h1>
+          <h2>Write your bot plugins with <strong><span class="language">...</span></strong></h2>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="container">
+
+      <hr class="featurette-divider">
+
+      <div class="featurette">
+        <img class="featurette-image img-responsive pull-right" src="images/paper.png">
+        <h2 class="featurette-heading">Usage
+          <span class="text-muted">As simple as editing a yaml</span>
+        </h2>
+        <p class="lead">
+          Your project should have a YAML file with the configuration, botella will read it and launch your bot.</p>
+        <p><pre><code>$ cat botella.yaml
+adapters:
+  - name: slack
+    environment:
+      key: xoxb-xxx
+
+plugins:
+  - image: agonzalezro/botella-test
+    environment:
+      KEY: this-is-a-secret
+    only_mentions: true
+
+$ ./botella # just launch it!</code></pre></p>
+        <p class="lead">
+          It supports more options than the ones shown above, <a href="https://github.com/agonzalezro/botella/blob/master/README.md">check the readme</a> to learn them.
+        </p>
+      </div>
+
+      <hr class="featurette-divider">
+
+      <div class="featurette">
+        <img class="featurette-image img-responsive pull-left" src="images/docker.png">
+        <h2 class="featurette-heading">Plugins
+          <span class="text-muted">Write them with your favourite language</span>
+        </h2>
+        <p class="lead">Plugins for botella are just Docker containers that receive a JSON an return plain text. For example, this is an Slack message:</p>
+        <p><pre><code>{
+  "version": -1,
+  "emitter": "U02SLLLH7",
+  "receiver": "G2TF58RH9",
+  "body": "u003c@U1PQFQ2SJu003e hi there my friend, do a deploy please"
+}</pre></code></p>
+        <p class="lead">You can <a href="https://github.com/agonzalezro/botella/blob/master/examples/botella-test">find an example here</a> and <a href="https://github.com/agonzalezro/botella/blob/master/README.md">a list of available plugins here</a>.<p>
+          <p class="lead">Probably in some point you would like to add storage, just use environment variables to define where it is (ex: host) and how to access it (ex: username & password).</p>
+      </div>
+
+      <hr class="featurette-divider">
+
+      <div class="featurette">
+        <img class="featurette-image img-responsive pull-right" src="images/plug.jpeg">
+        <h2 class="featurette-heading">Adapters
+          <span class="text-muted">Slack? HTTP? Add your own</span>
+        </h2>
+        <p class="lead">The idea behind botella is reach the maximum level of plugability with the minimum effort. For that reason, just editing the yaml file you will be able to add your bot to different stream, for example, to Slack and as an HTTP server.</p>
+        <p class="lead">Also, if you are a Go developer adding your own adapter wouldn't be complicated at all (check the current ones and the interface, it's pretty straigh forward). We have plans to add Telegram, IRC, Github <em>et al.</em></p>
+      </div>
+
+      <hr class="featurette-divider">
+
+      <!-- Footer -->
+      <footer>
+        <div class="row">
+          <div class="col-lg-12">
+            <p class="text-center">Made with <span class="glyphicon glyphicon-heart" aria-hidden="true"></span> by <a href="https://twitter.com/agonzalezro">@agonzalezro</a><br><em>while drinking a cup of café con leche</em></p>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <script src="js/typed.min.js"></script>
+
+    <script src="js/botella.js"></script>
+  </body>
+
+</html>
