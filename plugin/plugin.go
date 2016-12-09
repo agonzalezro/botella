@@ -27,7 +27,7 @@ type Plugin struct {
 
 type Input struct {
 	Version  int    `json:"version,omitempty"`
-	Emitter  string `json:"channel,omitempty"`
+	Emitter  string `json:"emitter,omitempty"`
 	Receiver string `json:"receiver,omitempty"`
 	Body     string `json:"body"`
 }
