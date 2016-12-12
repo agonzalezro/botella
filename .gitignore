@@ -3,3 +3,4 @@ botella
 vendor/
 /botella.yaml
 .DS_Store
+dist/
