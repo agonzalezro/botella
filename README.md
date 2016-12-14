@@ -1,7 +1,7 @@
 Botella
 =======
 
-Slack bot with plugins. What's the selling point then? The plugins are Docker containers and the bot interacts with them via stdin/stdout. In plain English that means that you can develop your plugins in whatever language you want and you will just need to pack them as Docker container to be able to use them with Botella.
+Bot (for Slack et al) with plugins. What's the selling point then? The plugins are Docker containers and the bot interacts with them via stdin/stdout. In plain English that means that you can develop your plugins in whatever language you want and you will just need to pack them as a Docker container to be able to use them with Botella.
 
 Usage
 -----
