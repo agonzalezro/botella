@@ -124,9 +124,16 @@ Developing plugins
 
 Developing a plugin for Botella is extremely simple, you will need to write a program and pack it with Docker.
 
-What are the characteristics that my program needs to follow? It will need to read a line (or several) from stdin and write a response to stdout.
+That program will receive a JSON and should reply with simple lines. For example, this is a JSON that your program will receive:
 
-In the [examples/](examples/) folder you will find an example plugin called `botella-test`. This plugin is uploaded to my Docker Hub so you can use it without building it, but it's a good place to learn.
+    {
+      "version": -1,
+      "emitter": "U02SLLLH7",
+      "receiver": "G2TF58RH9",
+      "body": "u003c@U1PQFQ2SJu003e ping"
+    }
+
+When your program receives that JSON it will probably check the `body` to see if it contains the word ping and then return a `pong`. How do you return a `pong`? Just write it to the standard output and exit.
 
 ### Examples
 
@@ -135,6 +142,7 @@ In the [examples/](examples/) folder you can find a simple plugin that does two 
 - it will echo whatever message is send to it, thinking out of the box you could do whatever you want with that input (from the container stdin) and output whatever you want instead just an echo. It will also use the fantastic [jq](https://stedolan.github.io/jq/) to parse the JSON. 
 - it shows the value of an environment variable set on the `botella.yaml` file. What we are trying to show with this? That you can pass secrets around (from the `botella.yaml` to the container) without compromise them. Imagine that the container needs an AWS key, just add it to your `botella.yaml` and read the value from inside the container.
 
+This plugin is uploaded on my Docker Hub in case you want to test it without building the Docker image: `agonzalezro/botella-test`.
 
 Developing Botella
 ------------------
