@@ -59,7 +59,9 @@ func environmentAsArrayOfString(image string, environment map[string]string) []s
 		// We want to override it with a value from the environment
 		if v == "" {
 			v, err = utils.GetFromEnvOrFromMap(image, nil, k)
-			log.Warning(err)
+			if err != nil {
+				log.Warning(err)
+			}
 		}
 		arrayOfEnvs = append(arrayOfEnvs, fmt.Sprintf("%s=%s", k, v))
 	}
