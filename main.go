@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -120,13 +121,19 @@ func listenAndReply(adapters []adapter.Adapter, plugins []*plugin.Plugin) {
 }
 
 func main() {
-	configPath, err := inferConfigPath()
-	if err != nil {
-		log.Error(err)
-		os.Exit(-1)
+	configPath := flag.String("f", "", "Use a different file for the config. By default: botella.y{,a}ml")
+	flag.Parse()
+
+	if *configPath == "" {
+		inferedPath, err := inferConfigPath()
+		if err != nil {
+			log.Error(err)
+			os.Exit(-1)
+		}
+		configPath = &inferedPath
 	}
 
-	config, err := config.NewFromFile(configPath)
+	config, err := config.NewFromFile(*configPath)
 	if err != nil {
 		log.Error(err)
 		os.Exit(-1)

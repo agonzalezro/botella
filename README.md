@@ -3,10 +3,15 @@ Botella
 
 Bot (for Slack et al) with plugins. What's the selling point then? The plugins are Docker containers and the bot interacts with them via stdin/stdout. In plain English that means that you can develop your plugins in whatever language you want and you will just need to pack them as a Docker container to be able to use them with Botella.
 
+Install
+-------
+
+[Grab a release](https://github.com/agonzalezro/botella/releases) & give it executable permissions, for example with `chmod a+x`.
+
 Usage
 -----
 
-You just need to be sure that you have a botella.yaml` file in the path where you run it. This file could look like:
+You just need to be sure that you have a `botella.yaml` (or in another place if you use `-f`) file in the path where you run it. This file could look like:
 
 ```yaml
 adapters:
