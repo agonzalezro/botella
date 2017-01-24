@@ -1,37 +1,28 @@
-hash: 7a599320e7ab8c55e97ade70b53696609778b0e4ece16fad8b2e82c35e3b042e
-updated: 2016-12-08T22:40:58.742542645+01:00
+hash: 36125b17142b1848e5580ff7ad31b8c113ac98f53203f27a8faff8f80b11afed
+updated: 2017-01-24T21:12:20.191644132+01:00
 imports:
-- name: github.com/docker/docker
-  version: ce6cfef36d6fa52df6ebdd3dd996d6bebe0f308d
-  subpackages:
-  - api/types/filters
-  - api/types/mount
-  - api/types/swarm
-  - api/types/versions
-  - opts
-  - pkg/archive
-  - pkg/fileutils
-  - pkg/homedir
-  - pkg/idtools
-  - pkg/ioutils
-  - pkg/longpath
-  - pkg/pools
-  - pkg/promise
-  - pkg/stdcopy
-  - pkg/system
-- name: github.com/docker/go-units
-  version: 8a7beacffa3009a9ac66bad506b18ffdd110cf97
+- name: github.com/certifi/gocertifi
+  version: 03be5e6bb9874570ea7fb0961225d193cbc374c5
 - name: github.com/fsouza/go-dockerclient
-  version: 425c52204cf4791085dabf1883aa0953660def9c
-- name: github.com/hashicorp/go-cleanhttp
-  version: ad28ea4487f05916463e2423a55166280e8254b5
-- name: github.com/Microsoft/go-winio
-  version: ce2922f643c8fd76b46cadc7f404a06282678b34
-- name: github.com/opencontainers/runc
-  version: 850b9c0b50dc2f3b9fa3e58d442bbae22f89a3ef
+  version: bf97c77db7c945cbcdbf09d56c6f87a66f54537b
   subpackages:
-  - libcontainer/system
-  - libcontainer/user
+  - external/github.com/Sirupsen/logrus
+  - external/github.com/docker/docker/opts
+  - external/github.com/docker/docker/pkg/archive
+  - external/github.com/docker/docker/pkg/fileutils
+  - external/github.com/docker/docker/pkg/homedir
+  - external/github.com/docker/docker/pkg/idtools
+  - external/github.com/docker/docker/pkg/ioutils
+  - external/github.com/docker/docker/pkg/longpath
+  - external/github.com/docker/docker/pkg/pools
+  - external/github.com/docker/docker/pkg/promise
+  - external/github.com/docker/docker/pkg/stdcopy
+  - external/github.com/docker/docker/pkg/system
+  - external/github.com/docker/go-units
+  - external/github.com/hashicorp/go-cleanhttp
+  - external/github.com/opencontainers/runc/libcontainer/user
+  - external/golang.org/x/net/context
+  - external/golang.org/x/sys/unix
 - name: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/stretchr/testify
@@ -41,18 +32,11 @@ imports:
 - name: github.com/twinj/uuid
   version: 7bbe408d339787c56ec15568c947c0959db1b275
 - name: golang.org/x/net
-  version: 41c5c5cb12965112d2e298342c73e6b3e045a14a
+  version: 6acef71eb69611914f7a30939ea9f6e194c78172
   subpackages:
-  - context
-  - context/ctxhttp
   - websocket
-- name: golang.org/x/sys
-  version: 002cbb5f952456d0c50e0d2aff17ea5eca716979
-  subpackages:
-  - unix
-  - windows
 - name: gopkg.in/yaml.v2
-  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9

@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"golang.org/x/net/websocket"
 
 	"github.com/agonzalezro/botella/plugin"
+	"github.com/certifi/gocertifi"
 )
 
 const (
@@ -42,9 +44,21 @@ func (sm SlackMessage) isDirectMessage() bool {
 	return strings.HasPrefix(sm.Channel, "D")
 }
 
+// TODO: this requires refactoring, it's tooooo long
 func NewSlack(key string) (*SlackAdapter, error) {
 	url := fmt.Sprintf(rtmURLformatter, key)
-	resp, err := http.Get(url)
+
+	cert_pool, err := gocertifi.CACerts()
+	if err != nil {
+		return nil, err
+	}
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{RootCAs: cert_pool},
+	}
+	client := http.Client{Transport: transport}
+
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +89,12 @@ func NewSlack(key string) (*SlackAdapter, error) {
 		return nil, errors.New(p.Error)
 	}
 
-	ws, err := websocket.Dial(p.URL, "", wsURL)
+	c, err := websocket.NewConfig(p.URL, wsURL)
+	if err != nil {
+		return nil, err
+	}
+	c.TlsConfig = &tls.Config{RootCAs: cert_pool}
+	ws, err := websocket.DialConfig(c)
 	if err != nil {
 		return nil, err
 	}

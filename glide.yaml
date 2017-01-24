@@ -7,3 +7,5 @@ import:
 - package: github.com/Sirupsen/logrus
   version: ^0.10.0
 - package: github.com/twinj/uuid
+- package: github.com/certifi/gocertifi
+  version: ~2017.1.23
