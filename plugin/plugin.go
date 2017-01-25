@@ -110,27 +110,29 @@ func (p *Plugin) Stop() error {
 		docker.RemoveContainerOptions{ID: p.container.ID, Force: true})
 }
 
-func (p *Plugin) Run(input Input) (string, error) {
+func (p *Plugin) Run(input Input) (string, string, error) {
 	// TODO: not sure if we should do this or keep an ongoing container running
 	if err := p.client.StartContainer(p.container.ID, nil); err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	var buf bytes.Buffer
+	var outBuf, errBuf bytes.Buffer
 	if err := p.client.AttachToContainer(docker.AttachToContainerOptions{
 		Container:    p.container.ID,
 		Stdin:        true,
 		Stdout:       true,
+		Stderr:       true,
 		InputStream:  strings.NewReader(input.JSON()),
-		OutputStream: &buf,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
 		Stream:       true,
 	}); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if _, err := p.client.WaitContainer(p.container.ID); err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return buf.String(), nil
+	return outBuf.String(), errBuf.String(), nil
 }

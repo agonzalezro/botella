@@ -91,15 +91,18 @@ func listenAndReply(adapters []adapter.Adapter, plugins []*plugin.Plugin) {
 						}
 						log.Debugf("Running plugin (%s) for: %+v", p.Image, m)
 
-						resp, err := p.Run(plugin.NewInput(m.Emitter, m.Receiver, m.Body))
+						stdout, stderr, err := p.Run(plugin.NewInput(m.Emitter, m.Receiver, m.Body))
 						if err != nil {
 							stderrCh <- err
 							continue
 						}
-						resp = strings.TrimSuffix(resp, "\n")
+						stdout = strings.TrimSuffix(stdout, "\n")
 
-						log.Debugf("Plugin (%s) response: %s", p.Image, resp)
-						stdoutCh <- adapter.Message{Receiver: m.Receiver, Body: resp}
+						log.Debugf("Plugin (%s) response: %s", p.Image, stdout)
+						if stderr != "" {
+							log.Errorf("Plugin (%s) threw an error: %s", p.Image, stderr)
+						}
+						stdoutCh <- adapter.Message{Receiver: m.Receiver, Body: stdout}
 					}
 				case err := <-stderrCh:
 					log.Error(err)
