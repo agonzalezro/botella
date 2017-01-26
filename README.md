@@ -149,6 +149,12 @@ In the [examples/](examples/) folder you can find a simple plugin that does two 
 
 This plugin is uploaded on my Docker Hub in case you want to test it without building the Docker image: `agonzalezro/botella-test`.
 
+### Debugging
+
+If you want to debug a plugin that you are working on you can set `DEBUG=1` when you run botella and you will see the errors that the plugin container is returning.
+
+Other option is to directly check the logs of that container, you will see the container ID with `docker ps -a .
+
 Developing Botella
 ------------------
 
@@ -165,4 +171,19 @@ $ go build
 
 ```bash
 $ go test $(glide novendor)
+```
+
+Building a Docker image
+-----------------------
+
+The Docker image for botella is based on `scratch`, the `Dockerfile` just copies a binary so you need to be sure that the binary is on `dist/`:
+
+```bash
+$ ./build-dist.sh
+```
+
+Then you can build the image:
+
+```bash
+$ docker build  -t [the_name_you_want_to_give] .
 ```
