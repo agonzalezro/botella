@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: slack-api
+type: Opaque
+data:
+  token: xxx
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubernetes-api
+type: Opaque
+data:
+  token: |-
+    ZXlKaGJHY2lPaUpTVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKcmRXSmxjbTVsZEdWekwzTmxjblpwWTJWaFkyTnZkVzUwSWl3aWEzVmlaWEp1WlhSbGN5NXBieTl6WlhKMmFXTmxZV05qYjNWdWRDOXVZVzFsYzNCaFkyVWlPaUprWldaaGRXeDBJaXdpYTNWaVpYSnVaWFJsY3k1cGJ5OXpaWEoyYVdObFlXTmpiM1Z1ZEM5elpXTnlaWFF1Ym1GdFpTSTZJbVJsWm1GMWJIUXRkRzlyWlc0dFkzWTBPVFlpTENKcmRXSmxjbTVsZEdWekxtbHZMM05sY25acFkyVmhZMk52ZFc1MEwzTmxjblpwWTJVdFlXTmpiM1Z1ZEM1dVlXMWxJam9pWkdWbVlYVnNkQ0lzSW10MVltVnlibVYwWlhNdWFXOHZjMlZ5ZG1salpXRmpZMjkxYm5RdmMyVnlkbWxqWlMxaFkyTnZkVzUwTG5WcFpDSTZJalEzTURRMlpHTm1MV1JpTlRBdE1URmxOaTFpTkRSakxUbGhNREk1TWpGalpUQTJZU0lzSW5OMVlpSTZJbk41YzNSbGJUcHpaWEoyYVdObFlXTmpiM1Z1ZERwa1pXWmhkV3gwT21SbFptRjFiSFFpZlEuUUxvOENKS1JhaC13VUREdXR0ellocE5NMHYwSDNVZWRIVm5CLTczR0JoUnpqTFhTYTh2eDdLNUxDSWRuTU5GWlRyQ1c5VF9kU0RYU2dPMl9NNDRRSFpOaEQwQUpEUFZ4RGVnZ3E4X3RFOHJrV09jdzZhTVAzRUpBRmZoNjQ4eE9QT1phenBkR3llMHBpU09nV196UVhjMl81Y0RBWWhMN2pJWEZVS3k1c2ozZDVaSWtRMXQ4SkhBMWpJVTQ4UjNWT0g5bU1icFRmU1lsajlPdlJab0RGZEU0bGV3b3YwWUtRT25FazRnS3pvcE50MUZiX2FLZ2g1djkwUUlKSnRmRGxmam9kcjhUYUFQTjd6UnBGdHN0bHlxOEUxUkthNXVlUGZvSldoYUw3a0tGd2UzbnpSejFXbkZCZjlWU0RCc3BsazBEVnVsRW4tRGVXN3NncHlZbnJB
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: botella-configmap
+  namespace: default
+data:
+  botella-yaml: |-
+    adapters:
+      - name: slack
+
+    plugins:
+      - image: agonzalezro/kubernetes-for-botella
+        environment:
+          TOKEN:
+          APISERVER: https://10.0.0.1:443
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: botella-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: botella
+    spec:
+      containers:
+        - name: botella
+          image: agonzalezro/botella:0.1.4
+          command: ["./botella", "-f", "/etc/botella.yaml"]
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: botella-configmap-volume
+              mountPath: /etc
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+              readOnly: false
+          env:
+            - name: DEBUG
+              value: "1"
+            - name: SLACK_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: slack-api
+                  key: token
+            - name: AGONZALEZRO_KUBERNETES_FOR_BOTELLA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: kubernetes-api
+                  key: token
+      volumes:
+        - name: botella-configmap-volume
+          configMap:
+            name: botella-configmap
+            items:
+              - key: botella-yaml
+                path: botella.yaml
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
