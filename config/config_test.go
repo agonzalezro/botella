@@ -21,6 +21,8 @@ plugins:
   - image: agonzalezro/botella-test
     environment:
       KEY: this-is-a-secret
+    volumes:
+      - /Users/alex:/alex
     only_mentions: true
     only_direct_messages: true
     only_channels: true
@@ -58,6 +60,9 @@ func TestNewFromFile(t *testing.T) {
 	assert.Equal("agonzalezro/botella-test", plugin.Image)
 	assert.Equal(len(plugin.Environment), 1)
 	assert.Equal("this-is-a-secret", plugin.Environment["KEY"])
+
+	assert.Equal(len(plugin.Volumes), 1)
+	assert.Equal("/Users/alex:/alex", plugin.Volumes[0])
 
 	assert.Equal(true, plugin.OnlyDirectMessages)
 	assert.Equal(true, plugin.OnlyMentions)

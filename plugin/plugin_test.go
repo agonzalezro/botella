@@ -17,8 +17,7 @@ func TestEnvironmentArray(t *testing.T) {
 
 	output := environmentAsArrayOfString("", input)
 	assert.Equal(2, len(output))
-	assert.Equal("PATH=path", output[0])
-	assert.Equal("SECRET=some-secret-key", output[1])
+	assert.EqualValues([]string{"PATH=path", "SECRET=some-secret-key"}, output)
 }
 
 // Test that if we define an empty value it tries to fallback to the system env vars.

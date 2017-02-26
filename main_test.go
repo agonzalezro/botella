@@ -72,3 +72,17 @@ func TestLoadAdaptersNotFound(t *testing.T) {
 	_, err := loadAdapters(&config)
 	assert.Error(t, err)
 }
+
+func TestVolumePathsCleaning(t *testing.T) {
+	assert := assert.New(t)
+
+	volumes := []string{
+		"hostPath",
+		"hostPath:containerPath",
+	}
+
+	assert.EqualValues(
+		[]string{"hostPath:hostPath", "hostPath:containerPath"},
+		ensureVolumeHasMountPoint(volumes),
+	)
+}

@@ -83,13 +83,16 @@ plugins:
   - image: agonzalezro/botella-test
     environment:
       KEY: this-is-a-secret
+    volumes:
+      - /tmp:/tmp-from-botella
     only_mentions: true
 ```
 
-It has 3 basic sections:
+It has 4 basic sections:
 
 - **`image`**: it's just the name of the Docker image to be run.
 - **`environment`**: the environment variables that you want to set to the container when you run it. Be careful, they are caseSensitive.
+- **`volumes`**: the volumes you want to mount from the host that is running botella inside the container that is running the plugin. 
 - **`only_mentions`** et al. They are basically three permissions that you can set to the plugin and that will work in the adapters that have the concept of channels and direct messages:
     - `only_mentions`: will make the bot just react when its mentioned.
     - `only_channels`: will make the bot just react when the message was send in a channel.
@@ -187,3 +190,8 @@ Then you can build the image:
 ```bash
 $ docker build  -t [the_name_you_want_to_give] .
 ```
+
+TODO
+----
+
+- Use some interface that avoids calling Docker on the tests.
