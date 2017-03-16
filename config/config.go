@@ -19,6 +19,7 @@ type Adapter struct {
 type Plugin struct {
 	Image              string
 	Environment        map[string]string
+	Volumes            []string
 	OnlyChannels       bool `yaml:"only_channels"`
 	OnlyDirectMessages bool `yaml:"only_direct_messages"`
 	OnlyMentions       bool `yaml:"only_mentions"`

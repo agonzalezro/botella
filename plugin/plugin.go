@@ -68,7 +68,7 @@ func environmentAsArrayOfString(image string, environment map[string]string) []s
 	return arrayOfEnvs
 }
 
-func New(image string, environment map[string]string) (*Plugin, error) {
+func New(image string, environment map[string]string, volumes []string) (*Plugin, error) {
 	client, err := docker.NewClientFromEnv()
 	if err != nil {
 		return nil, err
@@ -90,6 +90,9 @@ func New(image string, environment map[string]string) (*Plugin, error) {
 			AttachStdout: true,
 			OpenStdin:    true,
 			StdinOnce:    true,
+		},
+		HostConfig: &docker.HostConfig{
+			Binds: volumes,
 		},
 	})
 	if err != nil {

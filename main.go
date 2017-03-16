@@ -32,12 +32,26 @@ func inferConfigPath() (string, error) {
 	return "", fmt.Errorf("No %s file found!\n", strings.Join(paths, " or "))
 }
 
+// ensureVolumeHasMountPoint will return a list of volumes in the form `hostPath:containerPath` adding the `containerPath` in case it's missing.
+func ensureVolumeHasMountPoint(vs []string) []string {
+	volumes := []string{}
+	for _, v := range vs {
+		fragments := strings.Split(v, ":")
+		if len(fragments) < 2 {
+			v = fmt.Sprintf("%s:%s", fragments[0], fragments[0])
+		}
+		volumes = append(volumes, v)
+	}
+	return volumes
+}
+
 func loadPlugins(config *config.Config) ([]*plugin.Plugin, error) {
 	var plugins []*plugin.Plugin
 	for _, pluginConfig := range config.Plugins {
 		plugin, err := plugin.New(
 			pluginConfig.Image,
 			pluginConfig.Environment,
+			ensureVolumeHasMountPoint(pluginConfig.Volumes),
 		)
 		if err != nil {
 			return nil, fmt.Errorf("Error loading plugin (image: %s): %v", pluginConfig.Image, err)
